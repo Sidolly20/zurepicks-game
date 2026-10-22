@@ -68,6 +68,7 @@
     const escNav = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     fetch(apiUrl('/api/me'), { credentials: 'include' }).then((r) => r.json()).then((me) => {
       if (!me || me.guest) return;
+      if (/\/premium\.html$/.test(location.pathname)) { location.replace('premium-member.html'); return; }
       authNav.innerHTML = `<span class="who" title="${escNav(me.email)}">${escNav(me.name || me.email)}</span><button class="btn ghost sm" type="button" data-logout>Log out</button>`;
       const logout = authNav.querySelector('[data-logout]');
       logout?.addEventListener('click', async () => { try { await api('/api/logout', 'POST'); } finally { location.href = 'index.html'; } });
@@ -90,6 +91,50 @@
       return `<div class="record"><div class="record-head"><h2>2 Odds, last 7 days</h2></div><ol class="tiles">${tiles}</ol><p class="record-sum"><strong>${Number(record.wins)||0} of ${Number(record.settled)||0}</strong> settled slips won, <strong>${streak}-day</strong> winning run.</p></div>`;
     };
     const renderMatch = (m) => `<article class="match is-premium" data-league="${esc(m.league_id)}"><div class="m-time">${esc(m.kickoff || '')}</div><div class="m-main"><div class="m-teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div></div><span class="m-league">${esc(m.league || 'Football')}</span><div class="m-tip"><span class="tip">${esc(m.tip)}</span></div><div class="m-odds">${m.odds == null ? '—' : esc(m.odds)}</div><div class="m-res"><span class="res res-${esc(statusClass(m.status))}" title="${esc(statusLabel(m.status))}"><b>${m.status === 'won' ? 'W' : m.status === 'lost' ? 'L' : m.status === 'void' ? 'V' : '·'}</b><span>${esc(statusLabel(m.status))}</span></span></div></article>`;
+    const fmtDT = (t) => new Date(t).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const steps = (active) => `<ol class="steps">${['Pay', 'Send notice', 'Admin approves', 'Picks unlock'].map((l, i) => `<li class="${i < active ? 'done' : i === active ? 'now' : ''}"><i>${i < active ? '✓' : i + 1}</i><span>${l}</span></li>`).join('')}</ol>`;
+    async function renderMembership(host, me) {
+      let m;
+      try { m = await api('/api/membership', 'GET'); }
+      catch { host.innerHTML = '<p class="form-msg" role="alert">Membership details are temporarily unavailable. Please refresh the page.</p>'; return; }
+      const p = m.payment;
+      const price = `${Number(m.price).toLocaleString('en-US')} ${esc(m.currency)}`;
+      const contact = /^https:\/\//i.test(m.contact_link || '') ? `<a class="btn ghost" href="${esc(m.contact_link)}" target="_blank" rel="noopener">${esc(m.contact_label || 'Contact support')}</a>` : '';
+      if (p && p.status === 'pending') {
+        host.innerHTML = `<div class="mship"><div class="mship-hero is-pending"><span class="chip live"><b></b>Pending approval</span><h2>We have your payment notice</h2><p>An admin is checking it now. Your premium picks unlock automatically as soon as it is approved. You can leave this page and come back.</p>${steps(2)}</div>
+<div class="mship-card"><h3>What you sent</h3><dl class="kv"><div><dt>Sent</dt><dd>${esc(fmtDT(p.created_at))}</dd></div><div><dt>Details</dt><dd>${esc(p.note)}</dd></div><div><dt>Plan</dt><dd>${price} for ${Number(m.days)} days</dd></div></dl><div class="cta-row"><button class="btn" type="button" data-refresh>Check status</button>${contact}</div></div></div>`;
+        host.querySelector('[data-refresh]').addEventListener('click', (e) => { e.currentTarget.disabled = true; e.currentTarget.textContent = 'Checking…'; loadPremium(); });
+        return;
+      }
+      const expired = me.premium_until && me.premium_until < Date.now();
+      const banner = p && p.status === 'rejected'
+        ? '<div class="mship-note warn"><strong>Your last payment notice could not be confirmed.</strong> Check the reference and amount below, then send it again, or contact support.</div>'
+        : expired ? `<div class="mship-note warn"><strong>Your premium ended on ${esc(new Date(me.premium_until).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))}.</strong> Renew below to keep receiving the daily slip.</div>` : '';
+      host.innerHTML = `<div class="mship"><div class="mship-hero"><span class="chip">Premium</span><h2>Unlock 2 Odds daily</h2><p>Two selections every day. Pay once, send us the details, and your access starts when an admin confirms it.</p><div class="price"><b>${price}</b><span>for ${Number(m.days)} days</span></div>${steps(0)}</div>
+${banner}
+<div class="mship-grid">
+<section class="mship-card"><span class="num">1</span><h3>Make your payment</h3><p class="muted">Send <strong>${price}</strong> using the details below.</p><div class="pay-box"><pre>${esc(m.instructions)}</pre><button class="btn ghost sm" type="button" data-copy>Copy details</button></div></section>
+<section class="mship-card"><span class="num">2</span><h3>Tell us you have paid</h3><form class="mform" novalidate>
+<label>Payment reference<input name="ref" maxlength="70" required placeholder="Transaction ID, receipt number or last 4 digits"></label>
+<label>Name you paid with<input name="payer" maxlength="60" required placeholder="Name on the account or wallet"></label>
+<label><span>Amount sent <em>(optional)</em></span><input name="amount" maxlength="20" inputmode="decimal" placeholder="${Number(m.price)} ${esc(m.currency)}"></label>
+<label class="check"><input type="checkbox" name="ok" required> <span>I have completed the payment above.</span></label>
+<p class="form-msg" hidden role="alert"></p>
+<button class="btn lg" type="submit">I have made payment</button>
+<p class="fine">After you send this, your account shows <strong>Pending approval</strong> until an admin confirms. ${contact ? 'Need to send a receipt screenshot? Use the support button below.' : ''}</p>${contact ? `<div class="cta-row">${contact}</div>` : ''}</form></section>
+</div></div>`;
+      host.querySelector('[data-copy]').addEventListener('click', async (e) => { try { await navigator.clipboard.writeText(m.instructions); e.currentTarget.textContent = 'Copied ✓'; } catch { toast('Select the text and copy it manually.'); } });
+      const f = host.querySelector('.mform'), msg = f.querySelector('.form-msg');
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault(); msg.hidden = true;
+        if (!f.checkValidity()) { f.reportValidity(); return; }
+        const d = Object.fromEntries(new FormData(f));
+        const note = `Ref: ${d.ref.trim()} | Paid by: ${d.payer.trim()}${d.amount.trim() ? ' | Amount: ' + d.amount.trim() : ''}`.slice(0, 200);
+        const b = f.querySelector('button[type=submit]'); b.disabled = true; b.textContent = 'Sending…';
+        try { const out = await api('/api/payments', 'POST', { note }); toast(out.message || 'Payment notice sent.'); loadPremium(); }
+        catch (err) { msg.textContent = err.message; msg.hidden = false; b.disabled = false; b.textContent = 'I have made payment'; }
+      });
+    }
     const loadPremium = async () => {
       const recordHost = $('[data-premium-record]');
       const picksHost = $('[data-premium-picks]');
@@ -107,10 +152,7 @@
           if (picksHost) picksHost.innerHTML = '<div class="member-bar"><div><strong>Log in to continue</strong><span>Your account is required to check premium access.</span></div><a class="btn" href="login.html?next=%2Fpremium">Log in</a></div>';
           return;
         }
-        if (!me.isPremium) {
-          if (picksHost) picksHost.innerHTML = '<div class="member-bar"><div><strong>Premium access is not active</strong><span>Free members can view the public record. Premium selections appear here after the admin approves your membership.</span></div><a class="btn" href="premium.html">Membership details</a></div>';
-          return;
-        }
+        if (!me.isPremium) { if (picksHost) await renderMembership(picksHost, me); return; }
         const picksRes = await fetch(apiUrl('/api/premium'), { credentials: 'include' });
         const picksData = await picksRes.json();
         if (!picksRes.ok) throw new Error(picksData.error || 'Could not load premium selections.');

@@ -277,3 +277,45 @@ td .row-actions{display:flex;gap:.35rem;flex-wrap:wrap}
 .pill.premium{background:var(--gold);color:#201a00}
 .hint{font-size:.85rem;color:var(--muted);margin:.3rem 0 0}
 .adm-login{min-height:100vh;display:grid;place-items:center;padding:1.5rem}
+
+/* membership / payment flow */
+.mship{display:grid;gap:1.1rem}
+.mship-hero{position:relative;overflow:hidden;border-radius:24px;padding:clamp(1.4rem,4vw,2.4rem);color:#f2fff8;background:radial-gradient(900px 340px at 90% -20%,rgba(255,196,0,.28),transparent 60%),radial-gradient(700px 400px at -10% 120%,rgba(39,184,114,.45),transparent 60%),linear-gradient(135deg,#06402a,#0a7d4b);box-shadow:var(--shadow)}
+.mship-hero.is-pending{background:radial-gradient(800px 320px at 90% -20%,rgba(255,196,0,.35),transparent 60%),linear-gradient(135deg,#2b2406,#6d5600)}
+.mship-hero h2{color:#fff;margin:.6rem 0 .4rem;font-size:clamp(1.7rem,4vw,2.6rem)}
+.mship-hero p{max-width:56ch;color:rgba(242,255,248,.86);margin-bottom:1rem}
+.chip{display:inline-flex;align-items:center;gap:.45rem;padding:.3rem .8rem;border-radius:999px;font:700 .78rem var(--f-body);letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(6px);color:#fff}
+.chip.live b{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(255,196,0,.7);animation:pulse 1.8s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(255,196,0,0)}100%{box-shadow:0 0 0 0 rgba(255,196,0,0)}}
+.price{display:flex;align-items:baseline;gap:.6rem;margin:.2rem 0 1.2rem}
+.price b{font:800 clamp(2rem,6vw,3.2rem) var(--f-display);letter-spacing:-.04em;color:var(--gold)}
+.price span{color:rgba(242,255,248,.8);font-weight:600}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem}
+.steps li{display:flex;align-items:center;gap:.5rem;padding:.35rem .8rem .35rem .4rem;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);font-weight:600;font-size:.85rem;color:rgba(255,255,255,.75)}
+.steps li i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.18);font-size:.78rem}
+.steps li.now{color:#fff;background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.5)}
+.steps li.now i{background:var(--gold);color:#201a00}
+.steps li.done i{background:#27b872;color:#fff}
+.mship-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:1.1rem}
+.mship-card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:1.4rem 1.4rem 1.5rem;box-shadow:var(--shadow)}
+.mship-card h3{margin:.2rem 0 .5rem;font-size:1.3rem}
+.mship-card .num{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--pitch-t);color:var(--pitch);font:800 1rem var(--f-display);margin-bottom:.6rem}
+.pay-box{display:grid;gap:.7rem;padding:1rem;border-radius:16px;background:var(--bg);border:1px dashed color-mix(in srgb,var(--pitch) 45%,var(--line))}
+.pay-box pre{margin:0;white-space:pre-wrap;word-break:break-word;font:600 .98rem/1.55 var(--f-body);color:var(--ink)}
+.pay-box .btn{justify-self:start}
+.mform{display:grid;gap:.9rem}
+.mform label{display:grid;gap:.35rem;font-weight:600;font-size:.9rem}
+.mform label em{font-weight:400;color:var(--muted)}
+.mform input:not([type=checkbox]){font:500 1rem var(--f-body);color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:.8rem .9rem;width:100%}
+.mform input:not([type=checkbox]):focus{outline:none;border-color:var(--pitch);box-shadow:0 0 0 4px color-mix(in srgb,var(--pitch) 18%,transparent)}
+.mform .check{display:flex;align-items:flex-start;gap:.6rem;font-weight:500}
+.mform .check input{width:20px;height:20px;margin-top:.15rem;accent-color:var(--pitch);flex:none}
+.mform .btn.lg{width:100%}
+.fine{margin:0;color:var(--muted);font-size:.85rem}
+.mship-note{padding:1rem 1.2rem;border-radius:16px;font-size:.95rem}
+.mship-note.warn{background:var(--pend-t);color:var(--ink);border:1px solid color-mix(in srgb,var(--pend) 45%,transparent)}
+.kv{display:grid;gap:.7rem;margin:.6rem 0 1.1rem}
+.kv>div{display:grid;grid-template-columns:90px 1fr;gap:.8rem;padding-bottom:.7rem;border-bottom:1px solid var(--line)}
+.kv dt{color:var(--muted);font-weight:600;font-size:.88rem}
+.kv dd{margin:0;font-weight:600;word-break:break-word}
+.cta-row{display:flex;flex-wrap:wrap;gap:.6rem}
