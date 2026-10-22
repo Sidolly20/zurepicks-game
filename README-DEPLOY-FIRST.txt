@@ -1,0 +1,1 @@
+Deploy `zurepick-game` backend first, then deploy this `zurepicks-game` static frontend. Both Render URLs are already wired in the frontend and backend CORS configuration. Set backend environment variables as described in the backend README. Do not deploy the backend as a Static Site.

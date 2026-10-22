@@ -1,0 +1,11 @@
+ZUREPICKS FRONTEND — RENDER STATIC SITE
+
+Render service name: zurepicks-game
+Expected URL: https://zurepicks-game.onrender.com
+Backend API is preconfigured in app.js and admin.js: https://zurepick-game.onrender.com
+
+Deploy this folder as a Render Static Site. Build command can be left blank; publish directory is the folder root (or the root directory of this project if using a repository subdirectory).
+
+The frontend API URL is intentionally hardcoded to the requested backend service name. The backend must be deployed as a Web Service named `zurepick-game` and configured with FRONTEND_URL=https://zurepicks-game.onrender.com. Render service names must be available and the generated URLs must match.
+
+The original visual CSS and page layouts were preserved. The preview-mock.js file was intentionally excluded because it contains sample premium picks and fake admin data; it must not run on a live site. The premium-member.html page now requests premium picks from the backend only after the server confirms an authenticated premium session.
